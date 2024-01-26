@@ -1,16 +1,37 @@
+from typing import List, Optional
+
 import dash
+import pandas as pd
 from dash import html
-from dash.dependencies import Input, Output, ALL
-from .plot_node import PlotNode
+from dash.dependencies import ALL, Input, Output
+
 from .callbacks import update_plots_cback
 from .dash_view_utils import generate_dash_layout
+from .plot_node import PlotNode
 
 
 class DashApp:
-    def __init__(self, dataframe):
+    def __init__(
+        self,
+        dataframe: pd.DataFrame,
+        cols2exclude: Optional[List[str]] = None,
+    ):
         self.df = dataframe
         self.app = dash.Dash(__name__)
-        self.root_plot = PlotNode('0-0', self.df, self.df['A'].median(), 'A', 'B')
+
+        if cols2exclude:
+            if isinstance(cols2exclude, list) and all(isinstance(col, str) for col in cols2exclude):
+                if all(col in self.df.columns for col in cols2exclude):
+                    self.df.drop(columns=cols2exclude, inplace=True)
+                else:
+                    raise ValueError("One or more columns in `cols2exclude` do not exist in the dataframe")
+            else:
+                raise TypeError("`cols2exclude` must be a list of strings")
+
+        x_col = self.df.columns[0]
+        y_col = self.df.columns[1]
+
+        self.root_plot = PlotNode('0-0', self.df, self.df[x_col].median(), x_col, y_col)
         self.plot_instances = {0: [self.root_plot]}
         self.setup_layout()
         self.setup_callbacks()

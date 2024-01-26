@@ -27,8 +27,10 @@ def update_plots_cback(slider_values, x_values, y_values, plot_instances):
         current_plot.threshold = slider_values[flat_index]
     elif 'dynamic-dropdown-x' in trigger_id['type']:
         current_plot.x_col = x_values[flat_index]
+        current_plot.reset_threshold()
     elif 'dynamic-dropdown-y' in trigger_id['type']:
         current_plot.y_col = y_values[flat_index]
+        current_plot.reset_threshold()
 
     # Adjust the logic for child plot updates
     if update_type == 'value':  # Only update child plots if the slider was changed

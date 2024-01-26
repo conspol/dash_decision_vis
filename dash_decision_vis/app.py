@@ -33,10 +33,10 @@ class DashApp:
             else:
                 raise TypeError("`cols2exclude` must be a list of strings")
 
-        x_col = self.df.columns[0]
-        y_col = self.df.columns[1]
-
-        self.root_plot = PlotNode('0-0', self.df, self.df[x_col].median(), x_col, y_col)
+        self.root_plot = PlotNode(
+            '0-0',
+            self.df,
+        )
         self.plot_instances = {0: [self.root_plot]}
         self.setup_layout()
         self.setup_callbacks()

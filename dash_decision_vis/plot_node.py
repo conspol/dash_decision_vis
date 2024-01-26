@@ -1,14 +1,36 @@
 from dash import html, dcc
 import plotly.graph_objs as go
+import numpy as np
 
 
 class PlotNode:
-    def __init__(self, id, data, threshold, x_col, y_col, parent=None):
+    def __init__(
+        self,
+        id,
+        data,
+        threshold=None,
+        x_col=None,
+        y_col=None,
+        parent=None,
+    ):
         self.id = id
         self.data = data
-        self.threshold = threshold
-        self.x_col = x_col
-        self.y_col = y_col
+
+        if x_col is None:
+            self.x_col = self.data.columns[0]
+        else:
+            self.x_col = x_col
+
+        if y_col is None:
+            self.y_col = self.data.columns[1]
+        else:
+            self.y_col = y_col
+
+        if threshold is None:
+            self.threshold = np.median(self.data[self.x_col])
+        else:
+            self.threshold = threshold
+
         self.parent = parent
         self.children = []
 

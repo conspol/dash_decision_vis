@@ -1,6 +1,6 @@
-from .plot_node import PlotNode
-import numpy as np
 from typing import Dict, List
+
+from .plot_node import PlotNode
 
 
 def reconstruct_flat_index(target_plot_id, plot_instances):
@@ -31,9 +31,8 @@ def update_child_plots(parent_plot: PlotNode, depth, max_depth, plot_instances: 
             new_plot = PlotNode(
                 child_id,
                 threshold_data,
-                np.median(threshold_data[parent_plot.x_col]) if len(threshold_data) > 0 else 0,
-                parent_plot.x_col,
-                parent_plot.y_col,
+                x_col=parent_plot.x_col,
+                y_col=parent_plot.y_col,
                 parent=parent_plot,
             )
 

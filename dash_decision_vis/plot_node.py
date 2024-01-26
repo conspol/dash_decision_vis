@@ -27,7 +27,7 @@ class PlotNode:
             self.y_col = y_col
 
         if threshold is None:
-            self.threshold = np.median(self.data[self.x_col])
+            self.threshold = self._get_default_threshold()
         else:
             self.threshold = threshold
 
@@ -82,3 +82,9 @@ class PlotNode:
         below_threshold = data[data[x_col] <= threshold]
         above_threshold = data[data[x_col] > threshold]
         return below_threshold, above_threshold
+
+    def reset_threshold(self):
+        self.threshold = self._get_default_threshold()
+
+    def _get_default_threshold(self):
+        return np.median(self.data[self.x_col])

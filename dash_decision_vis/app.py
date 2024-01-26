@@ -15,9 +15,14 @@ class DashApp:
         self,
         dataframe: pd.DataFrame,
         cols2exclude: Optional[List[str]] = None,
+        debug_app: bool = False,
+        use_reloader_app: bool = False
     ):
         self.df = dataframe
         self.app = dash.Dash(__name__)
+
+        self._debug_flag = debug_app
+        self._use_reloader_flag = use_reloader_app
 
         if cols2exclude:
             if isinstance(cols2exclude, list) and all(isinstance(col, str) for col in cols2exclude):
@@ -55,4 +60,4 @@ class DashApp:
             return update_plots_cback(slider_values, x_values, y_values, plot_instances)
 
     def run(self):
-        self.app.run_server(debug=True)
+        self.app.run_server(debug=self._debug_flag, use_reloader=self._use_reloader_flag)

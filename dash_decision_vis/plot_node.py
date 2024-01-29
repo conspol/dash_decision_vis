@@ -1,7 +1,7 @@
 from dash import html, dcc
 import plotly.graph_objs as go
 import numpy as np
-
+import pandas as pd
 
 class PlotNode:
     def __init__(
@@ -12,9 +12,21 @@ class PlotNode:
         x_col=None,
         y_col=None,
         parent=None,
+        metadata=None,
     ):
         self.id = id
         self.data = data
+
+        if metadata is not None:
+            if isinstance(metadata, dict):
+                metadata = pd.DataFrame(metadata)
+            elif not isinstance(metadata, pd.DataFrame):
+                raise TypeError("`additional_data` must be either a dict or a pandas DataFrame")
+
+            if not metadata.index.equals(self.data.index):
+                raise ValueError("The index of `additional_data` does not match the index of the main dataframe")
+
+        self.metadata = metadata
 
         if x_col is None:
             self.x_col = self.data.columns[0]
@@ -40,12 +52,29 @@ class PlotNode:
     def layout(self):
         fig = go.Figure()
         for label, df_group in self.data.groupby('label'):
+            if self.metadata is not None:
+                aligned_metadata = self.get_metadata_loc(df_group.index)
+                custom_data = aligned_metadata.to_records(index=False)
+                text_data = aligned_metadata['text']
+                hovertemplate = (
+                    f"{self.x_col}: %{{x}}<br>" +
+                    f"{self.y_col}: %{{y}}<br>" +
+                    "%{text}<br>"
+                )
+            else:
+                custom_data = None
+                text_data = None
+                hovertemplate = None
+
             fig.add_trace(go.Scatter(
                 x=df_group[self.x_col], 
                 y=df_group[self.y_col], 
                 mode='markers', 
                 name=f'Label {label}',
-                marker=dict(color='red' if label == 1 else 'blue')
+                marker=dict(color='red' if label == 1 else 'blue'),
+                customdata=custom_data,
+                text=text_data,
+                hovertemplate=hovertemplate,
             ))
         fig.add_shape(type="line", x0=self.threshold, y0=self.data[self.y_col].min(), x1=self.threshold, y1=self.data[self.y_col].max(), line=dict(color="RoyalBlue", width=2))
         
@@ -88,3 +117,9 @@ class PlotNode:
 
     def _get_default_threshold(self):
         return np.median(self.data[self.x_col])
+
+    def get_metadata_loc(self, indices) -> pd.DataFrame:
+        if self.metadata is None:
+            return None
+        else:
+            return self.metadata.loc[indices]

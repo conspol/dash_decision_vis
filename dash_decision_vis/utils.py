@@ -24,7 +24,9 @@ def update_child_plots(parent_plot: PlotNode, depth, max_depth, plot_instances: 
         existing_plot = next((p for p in plot_instances.get(depth, []) if p.id == child_id), None)
 
         if existing_plot:
+            existing_plot.parent = parent_plot
             existing_plot.data = threshold_data
+            existing_plot.metadata = parent_plot.get_metadata_loc(threshold_data.index)
 
         else:
             # Create a new child plot if it doesn't exist
@@ -34,6 +36,7 @@ def update_child_plots(parent_plot: PlotNode, depth, max_depth, plot_instances: 
                 x_col=parent_plot.x_col,
                 y_col=parent_plot.y_col,
                 parent=parent_plot,
+                metadata=parent_plot.get_metadata_loc(threshold_data.index),
             )
 
             if depth not in plot_instances:

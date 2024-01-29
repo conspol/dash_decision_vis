@@ -1,11 +1,12 @@
-from typing import List, Optional
+from typing import Callable, List, Optional, Union
 
 import dash
 import pandas as pd
+import plotly.graph_objects as go
 from dash import html
 from dash.dependencies import ALL, Input, Output
 
-from .callbacks import update_plots_cback
+from .callbacks import update_aux_plot_cback, update_plots_cback
 from .dash_view_utils import generate_dash_layout
 from .plot_node import PlotNode
 
@@ -14,15 +15,20 @@ class DashApp:
     def __init__(
         self,
         dataframe: pd.DataFrame,
+        metadata: Optional[Union[dict, pd.DataFrame]] = None,
         cols2exclude: Optional[List[str]] = None,
         debug_app: bool = False,
-        use_reloader_app: bool = False
+        use_reloader_app: bool = False,
+        aux_updating_func: Callable[[List], go.Figure] = lambda: go.Figure(),
     ):
         self.df = dataframe
         self.app = dash.Dash(__name__)
 
         self._debug_flag = debug_app
         self._use_reloader_flag = use_reloader_app
+
+        self.metadata = metadata
+        self.aux_updating_func = aux_updating_func
 
         if cols2exclude:
             if isinstance(cols2exclude, list) and all(isinstance(col, str) for col in cols2exclude):
@@ -36,7 +42,9 @@ class DashApp:
         self.root_plot = PlotNode(
             '0-0',
             self.df,
+            metadata=metadata,
         )
+
         self.plot_instances = {0: [self.root_plot]}
         self.setup_layout()
         self.setup_callbacks()
@@ -57,7 +65,24 @@ class DashApp:
             prevent_initial_call=True
         )
         def update_plots(slider_values, x_values, y_values):
-            return update_plots_cback(slider_values, x_values, y_values, plot_instances)
+            return update_plots_cback(
+                slider_values,
+                x_values,
+                y_values,
+                plot_instances
+            )
+
+        @self.app.callback(
+            Output('aux-plot', 'figure'),
+            Input({'type': 'dynamic-graph', 'index': ALL}, 'clickData'),
+            prevent_initial_call=True,
+        )
+        def update_aux_plot(clickData):
+            return update_aux_plot_cback(
+                clickData,
+                self.aux_updating_func,
+                plot_instances,
+            )
 
     def run(self):
         self.app.run_server(debug=self._debug_flag, use_reloader=self._use_reloader_flag)

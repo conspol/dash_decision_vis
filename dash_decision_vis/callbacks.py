@@ -1,8 +1,10 @@
+import json
+
 import dash
 from dash.exceptions import PreventUpdate
-import json
-from .utils import reconstruct_flat_index, update_child_plots
+
 from .dash_view_utils import generate_dash_layout
+from .utils import reconstruct_flat_index, update_child_plots
 
 
 def update_plots_cback(slider_values, x_values, y_values, plot_instances):
@@ -10,7 +12,7 @@ def update_plots_cback(slider_values, x_values, y_values, plot_instances):
     if not ctx.triggered:
         raise PreventUpdate
 
-    trigger_id = json.loads(ctx.triggered[0]['prop_id'].split('.')[0])
+    trigger_id = ctx.triggered_id
     plot_id = trigger_id['index']
     depth, index = map(int, plot_id.split('-'))
 
@@ -38,3 +40,14 @@ def update_plots_cback(slider_values, x_values, y_values, plot_instances):
 
     layout = generate_dash_layout(plot_instances)
     return layout
+
+    
+def update_aux_plot_cback(clickData, aux_updating_func, plot_instances):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    plot_id = ctx.triggered_id['index']
+    flat_index = reconstruct_flat_index(plot_id, plot_instances)
+
+    return aux_updating_func(clickData[flat_index])

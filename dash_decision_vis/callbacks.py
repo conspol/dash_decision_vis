@@ -43,8 +43,8 @@ def update_plots_cback(
         current_plot.y_col = y_values[flat_index]
         current_plot.reset_threshold()
 
-    # Adjust the logic for child plot updates
-    if update_type == 'value':  # Only update child plots if the slider was changed
+    # Only update child plots if the slider was changed
+    if update_type == 'value':
         update_child_plots(current_plot, depth + 1, max_depth, plot_instances)
 
     layout = generate_dash_layout(plot_instances)

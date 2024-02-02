@@ -24,16 +24,19 @@ def update_child_plots(
     if depth > max_depth:
         return
 
-    below_threshold, above_threshold = PlotNode.split_data(parent_plot.data, parent_plot.threshold, parent_plot.x_col)
+    below_threshold, above_threshold = PlotNode.split_data(
+            parent_plot.data, parent_plot.threshold, parent_plot.x_col)
     
     for i, threshold_data in enumerate([below_threshold, above_threshold]):
         child_id = f"{depth}-{i}"
-        existing_plot = next((p for p in plot_instances.get(depth, []) if p.id == child_id), None)
+        existing_plot = next((p for p in plot_instances.get(depth, [])
+                              if p.id == child_id), None)
 
         if existing_plot:
             existing_plot.parent = parent_plot
             existing_plot.data = threshold_data
-            existing_plot.metadata = parent_plot.get_metadata_loc(threshold_data.index)
+            existing_plot.metadata = parent_plot.get_metadata_loc(
+                                            threshold_data.index)
 
         else:
             # Create a new child plot if it doesn't exist

@@ -25,10 +25,12 @@ class PlotNode:
             if isinstance(metadata, dict):
                 metadata = pd.DataFrame(metadata)
             elif not isinstance(metadata, pd.DataFrame):
-                raise TypeError("`additional_data` must be either a dict or a pandas DataFrame")
+                raise TypeError("`additional_data` must be either a dict "
+                                "or a pandas DataFrame")
 
             if not metadata.index.equals(self.data.index):
-                raise ValueError("The index of `additional_data` does not match the index of the main dataframe")
+                raise ValueError("The index of `additional_data` does not "
+                                 "match the index of the main dataframe")
 
         self.metadata = metadata
 
@@ -80,35 +82,53 @@ class PlotNode:
                 text=text_data,
                 hovertemplate=hovertemplate,
             ))
-        fig.add_shape(type="line", x0=self.threshold, y0=self.data[self.y_col].min(), x1=self.threshold, y1=self.data[self.y_col].max(), line=dict(color="RoyalBlue", width=2))
-        
-        title_text = f"Split by {self.parent.x_col} at {self.parent.threshold}" if self.parent else "Root Plot"
+
+        fig.add_shape(
+            type="line",
+            x0=self.threshold,
+            y0=self.data[self.y_col].min(),
+            x1=self.threshold,
+            y1=self.data[self.y_col].max(),
+            line=dict(color="RoyalBlue", width=2)
+        )
+
+        title_text = (f"Split by {self.parent.x_col} at {self.parent.threshold}"
+                      if self.parent else "Root Plot")
         fig.update_layout(title=title_text)
 
         return html.Div([
             dcc.Dropdown(
                 id={'type': 'dynamic-dropdown-x', 'index': self.id},
-                options=[{'label': col, 'value': col} for col in self.data.columns],
+                options=[{'label': col, 'value': col}
+                         for col in self.data.columns],
                 value=self.x_col,
                 clearable=False,
             ),
             dcc.Dropdown(
                 id={'type': 'dynamic-dropdown-y', 'index': self.id},
-                options=[{'label': col, 'value': col} for col in self.data.columns],
+                options=[{'label': col, 'value': col}
+                         for col in self.data.columns],
                 value=self.y_col,
                 clearable=False,
             ),
-            dcc.Graph(id={'type': 'dynamic-graph', 'index': self.id}, figure=fig),
+            dcc.Graph(id={'type': 'dynamic-graph', 'index': self.id},
+                      figure=fig),
             dcc.Slider(
                 id={'type': 'dynamic-slider', 'index': self.id},
                 min=self.data[self.x_col].min(),
                 max=self.data[self.x_col].max(),
                 value=self.threshold,
-                step=(self.data[self.x_col].max() - self.data[self.x_col].min()) / 1000,
+                step=(self.data[self.x_col].max() -
+                      self.data[self.x_col].min()) / 1000,
                 marks=None,
                 tooltip={"placement": "bottom", "always_visible": True},
             )
-        ], style={'width': '50%', 'minWidth': '300px', 'boxSizing': 'border-box', 'padding': '10px'})
+        ], style={
+            'width': '50%',
+            'minWidth': '300px',
+            'boxSizing': 'border-box',
+            'padding': '10px'
+        })
 
     @staticmethod
     def split_data(

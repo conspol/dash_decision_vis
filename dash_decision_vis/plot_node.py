@@ -25,11 +25,11 @@ class PlotNode:
             if isinstance(metadata, dict):
                 metadata = pd.DataFrame(metadata)
             elif not isinstance(metadata, pd.DataFrame):
-                raise TypeError("`additional_data` must be either a dict "
+                raise TypeError("`metadata` must be either a dict "
                                 "or a pandas DataFrame")
 
             if not metadata.index.equals(self.data.index):
-                raise ValueError("The index of `additional_data` does not "
+                raise ValueError("The index of `metadata` does not "
                                  "match the index of the main dataframe")
 
         self.metadata = metadata

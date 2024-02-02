@@ -1,9 +1,12 @@
+from typing import Dict
+
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 from PIL import Image
 
 
-def aux_imshow(clickData):
+def aux_imshow(clickData: Dict) -> go.Figure:
     # This should contain path to image.
     image_path = clickData['points'][0]['customdata'][1]
     img = Image.open(image_path)

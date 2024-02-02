@@ -1,18 +1,22 @@
-from dash import html, dcc
-import plotly.graph_objs as go
+from numbers import Real
+from typing import List, Optional, Tuple
+
 import numpy as np
 import pandas as pd
+import plotly.graph_objs as go
+from dash import dcc, html
+
 
 class PlotNode:
     def __init__(
         self,
-        id,
-        data,
-        threshold=None,
-        x_col=None,
-        y_col=None,
-        parent=None,
-        metadata=None,
+        id: str,
+        data: pd.DataFrame,
+        threshold: Optional[Real] = None,
+        x_col: Optional[str] = None,
+        y_col: Optional[str] = None,
+        parent: Optional['PlotNode'] = None,
+        metadata: Optional[dict | pd.DataFrame] = None,
     ):
         self.id = id
         self.data = data
@@ -46,10 +50,10 @@ class PlotNode:
         self.parent = parent
         self.children = []
 
-    def add_child(self, child):
+    def add_child(self, child: 'PlotNode') -> None:
         self.children.append(child)
 
-    def layout(self):
+    def layout(self) -> html.Div:
         fig = go.Figure()
         for label, df_group in self.data.groupby('label'):
             if self.metadata is not None:
@@ -107,7 +111,11 @@ class PlotNode:
         ], style={'width': '50%', 'minWidth': '300px', 'boxSizing': 'border-box', 'padding': '10px'})
 
     @staticmethod
-    def split_data(data, threshold, x_col):
+    def split_data(
+        data: pd.DataFrame,
+        threshold: Real,
+        x_col: str
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         below_threshold = data[data[x_col] <= threshold]
         above_threshold = data[data[x_col] > threshold]
         return below_threshold, above_threshold
@@ -115,10 +123,10 @@ class PlotNode:
     def reset_threshold(self):
         self.threshold = self._get_default_threshold()
 
-    def _get_default_threshold(self):
+    def _get_default_threshold(self) -> Real:
         return np.median(self.data[self.x_col])
 
-    def get_metadata_loc(self, indices) -> pd.DataFrame:
+    def get_metadata_loc(self, indices: pd.Index) -> Optional[pd.DataFrame]:
         if self.metadata is None:
             return None
         else:

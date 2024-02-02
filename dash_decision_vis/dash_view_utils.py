@@ -2,8 +2,10 @@ from typing import List
 
 from dash import dcc, html
 
+from .type_vars import TPlotInstances
 
-def generate_dash_layout(plot_instances):
+
+def generate_dash_layout(plot_instances: TPlotInstances) -> List[html.Div]:
     layout: List[html.Div] = []
     for level, level_plots in plot_instances.items():
         row = html.Div([plot.layout() for plot in level_plots],

@@ -1,4 +1,5 @@
-from typing import Callable, List, Optional, Union
+from numbers import Real
+from typing import Callable, Dict, List, Optional
 
 import dash
 import pandas as pd
@@ -9,13 +10,14 @@ from dash.dependencies import ALL, Input, Output
 from .callbacks import update_aux_plot_cback, update_plots_cback
 from .dash_view_utils import generate_dash_layout
 from .plot_node import PlotNode
+from .type_vars import TPlotInstances
 
 
 class DashApp:
     def __init__(
         self,
         dataframe: pd.DataFrame,
-        metadata: Optional[Union[dict, pd.DataFrame]] = None,
+        metadata: Optional[Dict | pd.DataFrame] = None,
         cols2exclude: Optional[List[str]] = None,
         debug_app: bool = False,
         use_reloader_app: bool = False,
@@ -45,14 +47,14 @@ class DashApp:
             metadata=metadata,
         )
 
-        self.plot_instances = {0: [self.root_plot]}
+        self.plot_instances: TPlotInstances = {0: [self.root_plot]}
         self.setup_layout()
         self.setup_callbacks()
 
-    def setup_layout(self):
+    def setup_layout(self) -> None:
         self.app.layout = html.Div(id='plots-container', children=generate_dash_layout(self.plot_instances))
 
-    def setup_callbacks(self):
+    def setup_callbacks(self) -> None:
         plot_instances = self.plot_instances
 
         @self.app.callback(
@@ -64,7 +66,11 @@ class DashApp:
             ],
             prevent_initial_call=True
         )
-        def update_plots(slider_values, x_values, y_values):
+        def update_plots(
+            slider_values: List[Real],
+            x_values: List[str],
+            y_values: List[str],
+        ) -> List[html.Div]:
             return update_plots_cback(
                 slider_values,
                 x_values,
@@ -77,7 +83,7 @@ class DashApp:
             Input({'type': 'dynamic-graph', 'index': ALL}, 'clickData'),
             prevent_initial_call=True,
         )
-        def update_aux_plot(clickData):
+        def update_aux_plot(clickData: Dict) -> go.Figure:
             return update_aux_plot_cback(
                 clickData,
                 self.aux_updating_func,

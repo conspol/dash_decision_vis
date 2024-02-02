@@ -1,13 +1,22 @@
-import json
+from numbers import Real
+from typing import Callable, Dict, List, Union
 
 import dash
+import plotly.graph_objs as go
+from dash import html
 from dash.exceptions import PreventUpdate
 
 from .dash_view_utils import generate_dash_layout
+from .type_vars import TPlotInstances
 from .utils import reconstruct_flat_index, update_child_plots
 
 
-def update_plots_cback(slider_values, x_values, y_values, plot_instances):
+def update_plots_cback(
+    slider_values: List[Real],
+    x_values: List[str],
+    y_values: List[str],
+    plot_instances: TPlotInstances,
+) -> List[html.Div]:
     ctx = dash.callback_context
     if not ctx.triggered:
         raise PreventUpdate
@@ -41,8 +50,12 @@ def update_plots_cback(slider_values, x_values, y_values, plot_instances):
     layout = generate_dash_layout(plot_instances)
     return layout
 
-    
-def update_aux_plot_cback(clickData, aux_updating_func, plot_instances):
+
+def update_aux_plot_cback(
+    clickData: List[Dict],
+    aux_updating_func: Callable[[Dict], go.Figure],
+    plot_instances: TPlotInstances,
+) -> go.Figure:
     ctx = dash.callback_context
     if not ctx.triggered:
         raise PreventUpdate

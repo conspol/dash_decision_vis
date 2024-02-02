@@ -1,9 +1,13 @@
 from typing import Dict, List
 
 from .plot_node import PlotNode
+from .type_vars import TPlotInstances
 
 
-def reconstruct_flat_index(target_plot_id, plot_instances):
+def reconstruct_flat_index(
+    target_plot_id: str,
+    plot_instances: TPlotInstances,
+) -> int:
     flat_index = 0
     for depth, plots in plot_instances.items():
         for index, plot in enumerate(plots):
@@ -13,7 +17,12 @@ def reconstruct_flat_index(target_plot_id, plot_instances):
     raise ValueError(f"Plot with ID {target_plot_id} not found")
 
 
-def update_child_plots(parent_plot: PlotNode, depth, max_depth, plot_instances: Dict[int, List]) -> None:
+def update_child_plots(
+    parent_plot: PlotNode,
+    depth: int,
+    max_depth: int, 
+    plot_instances: TPlotInstances,
+) -> None:
     if depth > max_depth:
         return
 

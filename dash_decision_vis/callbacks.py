@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List
 
 import dash
 import plotly.graph_objs as go

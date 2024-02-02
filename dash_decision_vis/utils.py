@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from .plot_node import PlotNode
 from .type_vars import TPlotInstances
 

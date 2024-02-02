@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ class PlotNode:
         x_col: Optional[str] = None,
         y_col: Optional[str] = None,
         parent: Optional['PlotNode'] = None,
-        metadata: Optional[dict | pd.DataFrame] = None,
+        metadata: Optional[Dict | pd.DataFrame] = None,
     ):
         self.id = id
         self.data = data

@@ -58,7 +58,7 @@ def update_child_plots(
         update_child_plots(child_plot, depth + 1, max_depth, plot_instances)
 
 
-def traverse_plots(plot: PlotNode):
+def traverse_plots_gen(plot: PlotNode) -> PlotNode:
     yield plot
     for child in plot.children:
-        yield from traverse_plots(child)
+        yield from traverse_plots_gen(child)

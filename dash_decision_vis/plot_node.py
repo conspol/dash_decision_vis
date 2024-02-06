@@ -95,7 +95,7 @@ class PlotNode:
                 legend_name = unique_legends[0]
 
             else:
-                legend_name = f'Label {label}'
+                legend_name = f'{label}'
 
             fig.add_trace(go.Scatter(
                 x=df_group[self.x_col], 

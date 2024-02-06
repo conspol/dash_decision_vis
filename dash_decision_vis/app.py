@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Optional
 
 import dash
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 from dash import html
 from dash.dependencies import ALL, Input, Output
@@ -22,6 +23,7 @@ class DashApp:
         debug_app: bool = False,
         use_reloader_app: bool = False,
         aux_updating_func: Callable[[List], go.Figure] = lambda: go.Figure(),
+        color_mapping: Optional[Dict] = None,
     ):
         self.df = dataframe
         self.app = dash.Dash(__name__)
@@ -31,6 +33,14 @@ class DashApp:
 
         self.metadata = metadata
         self.aux_updating_func = aux_updating_func
+
+        if color_mapping is None:
+            unique_labels = self.df['label'].unique()
+            colors = px.colors.qualitative.Plotly 
+            color_mapping = {label: colors[i % len(colors)]
+                                  for i, label in enumerate(unique_labels)}
+
+        self.color_mapping = color_mapping
 
         if cols2exclude:
             if isinstance(cols2exclude, list) and all(isinstance(col, str) for col in cols2exclude):
@@ -45,6 +55,7 @@ class DashApp:
             '0-0',
             self.df,
             metadata=metadata,
+            color_mapping=self.color_mapping,
         )
 
         self.plot_instances: TPlotInstances = {0: [self.root_plot]}

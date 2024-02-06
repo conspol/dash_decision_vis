@@ -3,8 +3,11 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objs as go
 from dash import dcc, html
+
+from loguru import logger as lg
 
 
 class PlotNode:
@@ -17,6 +20,7 @@ class PlotNode:
         y_col: Optional[str] = None,
         parent: Optional['PlotNode'] = None,
         metadata: Optional[Dict | pd.DataFrame] = None,
+        color_mapping: Optional[Dict] = None,
     ):
         self.id = id
         self.data = data
@@ -49,6 +53,14 @@ class PlotNode:
         else:
             self.threshold = threshold
 
+        if color_mapping is None:
+            unique_labels = self.data['label'].unique()
+            colors = px.colors.qualitative.Plotly 
+            self.color_mapping = {label: colors[i % len(colors)]
+                                  for i, label in enumerate(unique_labels)}
+        else:
+            self.color_mapping = color_mapping
+
         self.parent = parent
         self.children = []
 
@@ -72,12 +84,25 @@ class PlotNode:
                 text_data = None
                 hovertemplate = None
 
+            marker_color = self.color_mapping[label]
+
+            if 'label_legend' in self.data.columns:
+                unique_legends = df_group['label_legend'].unique()
+                
+                if len(unique_legends) > 1:
+                    lg.warn("Inconsistent `label_legend` values for "
+                            f"label: {label}. Using first value for legend.")
+                legend_name = unique_legends[0]
+
+            else:
+                legend_name = f'Label {label}'
+
             fig.add_trace(go.Scatter(
                 x=df_group[self.x_col], 
                 y=df_group[self.y_col], 
                 mode='markers', 
-                name=f'Label {label}',
-                marker=dict(color='red' if label == 1 else 'blue'),
+                name=legend_name,
+                marker=dict(color=marker_color),
                 customdata=custom_data,
                 text=text_data,
                 hovertemplate=hovertemplate,

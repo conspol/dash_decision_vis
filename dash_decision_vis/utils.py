@@ -47,6 +47,7 @@ def update_child_plots(
                 y_col=parent_plot.y_col,
                 parent=parent_plot,
                 metadata=parent_plot.get_metadata_loc(threshold_data.index),
+                color_mapping=parent_plot.color_mapping,
             )
 
             if depth not in plot_instances:

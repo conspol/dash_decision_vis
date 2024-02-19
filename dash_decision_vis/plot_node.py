@@ -169,7 +169,12 @@ class PlotNode:
         self.threshold = self._get_default_threshold()
 
     def _get_default_threshold(self) -> Real:
-        return np.median(self.data[self.x_col])
+        try:
+            return np.median(self.data[self.x_col])
+        except TypeError:
+            lg.warning("Could not calculate median for threshold "
+                       f"given the column's {self.x_col} type.")
+            return 0
 
     def get_metadata_loc(self, indices: pd.Index) -> Optional[pd.DataFrame]:
         if self.metadata is None:

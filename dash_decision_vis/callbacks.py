@@ -16,6 +16,7 @@ def update_plots_cback(
     x_values: List[str],
     y_values: List[str],
     plot_instances: TPlotInstances,
+    update_on_yaxis: bool = False,
 ) -> List[html.Div]:
     ctx = dash.callback_context
     if not ctx.triggered:
@@ -41,7 +42,8 @@ def update_plots_cback(
         current_plot.reset_threshold()
     elif 'dynamic-dropdown-y' in trigger_id['type']:
         current_plot.y_col = y_values[flat_index]
-        current_plot.reset_threshold()
+        if update_on_yaxis:
+            current_plot.reset_threshold()
 
     # Only update child plots if the slider was changed
     if update_type == 'value':

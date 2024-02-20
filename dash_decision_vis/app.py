@@ -24,6 +24,7 @@ class DashApp:
         use_reloader_app: bool = False,
         aux_updating_func: Callable[[List], go.Figure] = lambda: go.Figure(),
         color_mapping: Optional[Dict] = None,
+        update_on_yaxis: bool = False,
     ):
         self.df = dataframe
         self.app = dash.Dash(__name__)
@@ -33,6 +34,7 @@ class DashApp:
 
         self.metadata = metadata
         self.aux_updating_func = aux_updating_func
+        self.update_on_yaxis = update_on_yaxis
 
         if color_mapping is None:
             unique_labels = self.df['label'].unique()
@@ -86,7 +88,8 @@ class DashApp:
                 slider_values,
                 x_values,
                 y_values,
-                plot_instances
+                plot_instances,
+                self.update_on_yaxis
             )
 
         @self.app.callback(

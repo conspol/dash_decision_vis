@@ -1,10 +1,11 @@
+from typing import Dict
+
 import pandas as pd
 import plotly.graph_objects as go
 from sklearn.datasets import make_classification
 
 from dash_decision_vis.app import DashApp
 
-from typing import Dict
 
 def aux_display_text(clickData: Dict) -> go.Figure:
     # Extract text from the clicked point's customdata.

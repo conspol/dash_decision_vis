@@ -1,28 +1,27 @@
 from numbers import Real
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from dash import dcc, html
-
 from loguru import logger as lg
 
 
 class PlotNode:
     def __init__(
         self,
-        id: str,
         data: pd.DataFrame,
+        id: str,
         threshold: Optional[Real] = None,
         x_col: Optional[str] = None,
         y_col: Optional[str] = None,
         parent: Optional['PlotNode'] = None,
+        children: Optional[List['PlotNode']] = None,
         metadata: Optional[Dict | pd.DataFrame] = None,
         color_mapping: Optional[Dict] = None,
     ):
-        self.id = id
         self.data = data
 
         if metadata is not None:
@@ -61,8 +60,13 @@ class PlotNode:
         else:
             self.color_mapping = color_mapping
 
+        self.children = children or []
         self.parent = parent
-        self.children = []
+
+        if self.parent:
+            self.id = self.parent.id + '-' + id
+        else:
+            self.id = id
 
     def add_child(self, child: 'PlotNode') -> None:
         self.children.append(child)

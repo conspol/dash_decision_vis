@@ -9,7 +9,7 @@ from dash import html
 from dash.dependencies import ALL, Input, Output
 
 from .callbacks import update_aux_plot_cback, update_plots_cback
-from .dash_view_utils import generate_dash_layout
+from .dash_view_utils import generate_dash_layout_tree
 from .plot_node import PlotNode
 from .type_vars import TPlotInstances
 
@@ -54,18 +54,18 @@ class DashApp:
                 raise TypeError("`cols2exclude` must be a list of strings")
 
         self.root_plot = PlotNode(
-            '0-0',
-            self.df,
+            data=self.df,
+            id='0',
             metadata=metadata,
             color_mapping=self.color_mapping,
         )
 
-        self.plot_instances: TPlotInstances = {0: [self.root_plot]}
+        self.plot_instances: TPlotInstances = {'0': self.root_plot}
         self.setup_layout()
         self.setup_callbacks()
 
     def setup_layout(self) -> None:
-        self.app.layout = html.Div(id='plots-container', children=generate_dash_layout(self.plot_instances))
+        self.app.layout = html.Div(id='plots-container', children=generate_dash_layout_tree(self.plot_instances))
 
     def setup_callbacks(self) -> None:
         plot_instances = self.plot_instances

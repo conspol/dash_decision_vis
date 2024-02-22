@@ -8,7 +8,12 @@ from dash.exceptions import PreventUpdate
 
 from .dash_view_utils import generate_dash_layout_tree
 from .type_vars import TPlotInstances
-from .utils import update_child_plots
+from .utils import (
+    get_node_depth,
+    get_tree_depth,
+    update_child_plots,
+    create_child_plots_pair,
+)
 
 
 def update_plots_cback(
@@ -25,8 +30,21 @@ def update_plots_cback(
     trigger_id = ctx.triggered_id
     plot_id = trigger_id['index']
 
+    # depth, index = map(int, plot_id.split('-'))
+
     current_plot = plot_instances[plot_id]
     update_type = ctx.triggered[0]['prop_id'].split('.')[1]
+
+    # flat_index = reconstruct_flat_index(plot_id, plot_instances)
+
+    # max_depth = max(plot_instances.keys())
+    # if depth == max_depth:
+    #     max_depth += 1
+
+    tree_depth = get_tree_depth(current_plot)
+    current_depth = get_node_depth(current_plot)
+    if current_depth == tree_depth:
+        below_thr_node, above_thr_node = create_child_plots_pair(current_plot)
 
     if 'slider' in trigger_id['type']:  # Slider update
         current_plot.threshold = ctx.triggered[0]['value']

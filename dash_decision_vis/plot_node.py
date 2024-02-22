@@ -68,6 +68,12 @@ class PlotNode:
         else:
             self.id = id
 
+    def __repr__(self) -> str:
+        return f"PlotNode({self.id})"
+
+    def __str__(self) -> str:
+        return f"PlotNode({self.id})"
+
     def add_child(self, child: 'PlotNode') -> None:
         self.children.append(child)
 

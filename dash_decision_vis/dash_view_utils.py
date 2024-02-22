@@ -20,67 +20,69 @@ def generate_dash_layout_simple(plot_instances: TPlotInstances) -> List[html.Div
 
 
 def generate_dash_layout_tree(plot_instances: TPlotInstances) -> html.Div:
-    def find_children_ids(parent_id):
-        return [f"{parent_id}-0" if parent_id != ''
-                else "0", f"{parent_id}-1" if parent_id != '' else "1"]
+    max_depth = max(
+        (plot_id.count('-') for plot_id in plot_instances), 
+        default=0
+    ) + 1
 
-    def generate_plot_layout(plot_id, level):
-        plot = plot_instances.get(plot_id)
-        if plot:
-            return html.Div(
-                plot.layout(),
+    def generate_table(max_depth):
+        table = [
+            [
+                html.Td(
+                    style={
+                        'min-width': '500px', 
+                        'visibility': 'hidden', 
+                        'text-align': 'center'
+                    }
+                ) for _ in range(2**max_depth)
+            ] for _ in range(max_depth)
+        ]
+        
+        for plot_id, plot in plot_instances.items():
+            depth = plot_id.count('-')
+            index = int('0' + plot_id.replace('-', ''), 2) if plot_id else 0
+            position = index * (2 ** (max_depth - depth - 1))
+            position = min(position, 2**max_depth - 1)
+            table[depth][position] = html.Td(
+                plot.layout(), 
                 style={
-                    'width': f'{100 / (2 ** level)}%',
-                    'display': 'inline-block'
-                },
+                    'min-width': '500px', 
+                    'text-align': 'center'
+                }
             )
-        return None
 
-    def generate_level_layout(parent_ids, level):
-        children_ids = []
-        level_plots = []
-        for parent_id in parent_ids:
-            for child_id in find_children_ids(parent_id):
-                child_layout = generate_plot_layout(child_id, level)
-                if child_layout:
-                    level_plots.append(child_layout)
-                    children_ids.append(child_id)
-        return level_plots, children_ids
+        return html.Table(
+            [html.Tr(row) for row in table], 
+            style={
+                # 'width': '100%', 
+                # 'table-layout': 'fixed'
+            }
+        )
 
-    # Initialize the main container with overflow for horizontal scrolling
     layout = html.Div(
-        id='plot-tree-container',
         style={
-            'width': 'max-content',
-            'display': 'block',
-            'overflow-x': 'auto',
+            'display': 'flex', 
+            'height': '100vh'
         },
-        children=[],
+        children=[
+            html.Div(
+                style={
+                    'overflow': 'auto', 
+                    'flex-grow': '1'
+                },
+                children=[generate_table(max_depth)]
+            ),
+            html.Div(
+                style={
+                    'min-width': '40vw', 
+                    # 'height': '100vh', 
+                    'position': 'fixed', 
+                    'right': '0', 
+                    'top': '0'
+                },
+                children=[dcc.Graph(id='aux-plot')]
+            )
+        ]
     )
-
-    current_level = 0
-    current_level_ids = ['']
-
-    first_row_added = False
-
-    while current_level_ids:
-        level_layout, next_level_ids = generate_level_layout(current_level_ids, current_level)
-        # Special case for the first row to include aux-plot
-        if not level_layout and not first_row_added: 
-            level_layout = [dcc.Graph(id='aux-plot')]
-            first_row_added = True
-        elif not level_layout:
-            break
-
-        row = html.Div(level_layout, style={'display': 'flex', 'justify-content': 'center'})
-        layout.children.append(row)
-
-        # Add aux-plot to the first row
-        if current_level == 0 and not first_row_added:
-            row.children.append(dcc.Graph(id='aux-plot'))
-            first_row_added = True
-
-        current_level_ids = next_level_ids
-        current_level += 1
 
     return layout

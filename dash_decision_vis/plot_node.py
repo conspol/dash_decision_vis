@@ -153,7 +153,7 @@ class PlotNode:
                 tooltip={"placement": "bottom", "always_visible": True},
             )
         ], style={
-            'width': '50%',
+            # 'width': '50%',
             'minWidth': '300px',
             'boxSizing': 'border-box',
             'padding': '10px'

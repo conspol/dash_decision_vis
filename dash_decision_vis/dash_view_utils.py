@@ -1,9 +1,10 @@
 from typing import List
+from collections import deque, defaultdict
 
 from dash import dcc, html
 
 from .type_vars import TPlotInstances
-from .utils import group_by_key_length
+from .utils import group_by_key_length, get_node_depth, get_tree_depth
 
 
 def generate_dash_layout_simple(plot_instances: TPlotInstances) -> List[html.Div]:
@@ -20,11 +21,6 @@ def generate_dash_layout_simple(plot_instances: TPlotInstances) -> List[html.Div
 
 
 def generate_dash_layout_tree(plot_instances: TPlotInstances) -> html.Div:
-    max_depth = max(
-        (plot_id.count('-') for plot_id in plot_instances), 
-        default=0
-    ) + 1
-
     def generate_table(max_depth):
         table = [
             [
@@ -59,6 +55,52 @@ def generate_dash_layout_tree(plot_instances: TPlotInstances) -> html.Div:
             }
         )
 
+    def generate_table_dfs():
+        """
+        This function should be able to produce a table from any tree,
+        not just a binary one.
+        """
+        table = defaultdict(list)
+        irow = 0
+        stack = [plot_instances['0']]
+        max_depth = get_tree_depth(stack[0])
+
+        while stack:
+            current_plot = stack.pop()
+
+            if irow == 0:
+                for i_ in range(get_node_depth(current_plot) - 1):
+                    table[i_].append(
+                        html.Td(style={'background-color': 'whitesmoke'}))
+                    irow += 1 
+
+            table[irow].append(html.Td(
+                current_plot.layout(),
+                style={
+                    'min-width': '500px', 
+                    'text-align': 'center'
+                }
+            ))
+            if current_plot.children:
+                stack.extend(current_plot.children[::-1])
+                irow += 1
+            else:
+                rows2fill = max_depth - irow - 1
+                for _ in range(rows2fill):
+                    irow += 1
+                    table[irow].append(html.Td())
+                irow = 0
+
+        return html.Table(
+            [html.Tr(row) for row in table.values()], 
+            style={
+                # 'width': '100%', 
+                # 'table-layout': 'fixed'
+            }
+        )
+
+    html_table = generate_table_dfs()
+
     layout = html.Div(
         style={
             'display': 'flex', 
@@ -70,7 +112,7 @@ def generate_dash_layout_tree(plot_instances: TPlotInstances) -> html.Div:
                     'overflow': 'auto', 
                     'flex-grow': '1'
                 },
-                children=[generate_table(max_depth)]
+                children=[html_table]
             ),
             html.Div(
                 style={
